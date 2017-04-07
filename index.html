@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Nau Tech Stack</title>
+</head>
+<body>
+	<h1>Nau Technologies Stack</h1>
+	<svg width="1024" height="800" font-family="sans-serif" font-size="10" text-anchor="middle"></svg>
+	<script src="js/d3.min.js"></script>
+	<script>
+		const csv = `cat,name,value
+library,D3,20
+library,PostCSS,10
+library,Raphael,30
+library,Relay,70
+library,Three.js,40
+library.sub,Lodash,30
+library.sub,Moment JS,30
+library.sub,Numeral,20
+library.sub,Redux,100
+
+framework,Angular 2.0,30
+framework,Trails.JS,10
+framework,Bootstrap CSS,50
+framework,Ember JS,10
+framework,ExpressJS,30
+framework,Foundation,10
+framework,Hexo,50
+framework,ReactJS,100
+framework,SenchaTouch,10
+
+tooling,Atom,10
+tooling,Google Chrome & Devtool,70
+tooling,Jenkin CI,30
+tooling,Sublime Text 3,100
+tooling,Visual Studio Code,50
+tooling,Web Page Performance Tooling,30
+tooling,Yeoman generator for Nau Workflow,20
+
+backend,Elastic Search,10
+backend,Keystone CMS,50
+backend,KoaJS,10
+backend,Loopback,30
+backend,Restify,20
+backend,MongoDB,70
+backend,NodeJS,100
+
+platform,Docker Platform, 10
+platform,MeteorJS,80
+platform,Reaction Commerce,20
+platform,ReactNative,10
+platform,SquareSpace,30
+
+language,ECMAScript 6,100
+language,HTML5 & CSS3,80
+language,JavaScript,50
+language,CSS Next, 10
+language,GraphQL,50
+language,LESS CSS,20
+language,SCSS (Sass),70
+language,TypeScript 2,30
+
+workflow,code.naustud.io,100
+workflow,BabelJS,50
+workflow,Browserify,10
+workflow,CSS BEM Notation,70
+workflow,CSS Guidelines,20
+workflow,ESLint,20
+workflow,Git Flow,70
+workflow,GulpJS,50
+workflow,Nau Code Styles,50
+workflow,Stylelint,50
+workflow,SystemJS,10
+workflow,Webpack,30
+
+deprecated,Angular JS 1,10
+deprecated,Backbone,30
+deprecated,Grunt & Automation Stack,30
+deprecated,jQuery,50
+deprecated,RequireJS & AMD,30
+deprecated.tooling,Browser Sync,40
+deprecated.tooling,Git Pre-commit,30
+deprecated.tooling,http-server,20
+deprecated.tooling,Live Reload,20
+deprecated.tooling,live-server,30
+`
+	</script>
+
+
+	<script>
+		let svg = d3.select('svg');
+		let width = +svg.attr('width');
+		let height = +svg.attr('height');
+		let halfWidth = width * 0.5;
+		let halfHeight = height * 0.5;
+		let strength = 0.05;
+		let focusedNode;
+
+		let format = d3.format(',d');
+
+		let scaleColor = d3.scaleOrdinal(d3.schemeCategory20);
+		// TODO: move pack() and hierarchy() to simple scaleSqrt()
+
+		// use pack to calculate radius of the circle
+		let pack = d3.pack()
+			.size([width , height ])
+			// .size([width * 0.5, height * 0.5]) // half size of viewport
+			.padding(1.5);
+
+		let forceCollide = d3.forceCollide(d => d.r + 1);
+
+		// use the force
+		let simulation = d3.forceSimulation()
+			// .force('link', d3.forceLink().id(d => d.id))
+			.force('charge', d3.forceManyBody())
+			.force('collide', forceCollide)
+			// .force('center', d3.forceCenter(halfWidth, halfHeight))
+			.force('x', d3.forceX(halfWidth ).strength(strength))
+			.force('y', d3.forceY(halfHeight ).strength(strength));
+
+		let data = d3.csvParse(csv, (d) => {
+			d.value = +d.value;
+			if (d.value) return d;
+		});
+
+		let root = d3.hierarchy({ children: data })
+			.sum(d => d.value);
+
+		// we use pack() to automatically calculate radius conveniently only
+		// and get only the leaves
+		let nodes = pack(root).leaves().map(node => {
+			console.log('node:', node.x, (node.x - halfWidth) * 2);
+			const data = node.data;
+			return {
+				x: halfWidth + (node.x - halfWidth) * 3, // magnify start position to have transition to center movement
+				y: halfHeight + (node.y - halfHeight) * 3,
+				r: node.r,
+				startR: node.r, //original radius
+				id: data.cat + '.' + (data.name.replace(/\s/g, '-')),
+				cat: data.cat,
+				name: data.name,
+				value: data.value,
+			}
+		});
+
+		svg.style('background-color', '#eee');
+		let node = svg.selectAll('.node')
+			.data(nodes)
+			.enter().append('g')
+			.attr('class', 'node')
+			.call(d3.drag()
+				.on('start', (d) => {
+					if (!d3.event.active) simulation.alphaTarget(0.2).restart();
+					d.fx = d.x;
+					d.fy = d.y;
+				})
+				.on('drag', (d) => {
+					d.fx = d3.event.x;
+					d.fy = d3.event.y;
+				})
+				.on('end', (d) => {
+					if (!d3.event.active) simulation.alphaTarget(0);
+					d.fx = null;
+					d.fy = null;
+				}));
+
+		simulation.nodes(nodes).on('tick', ticked);
+
+		let circles = node.append('circle')
+			.attr('id', d => d.id)
+			.attr('r', 0)
+			.style('fill', d => scaleColor(d.cat))
+			.transition().duration(2000).ease(d3.easeElasticOut)
+				.attr('r', d => d.r);
+
+		node.append('clipPath')
+			.attr('id', d => 'clip-' + d.id)
+			.append('use')
+			.attr('xlink:href', d => '#' + d.id);
+
+		node.append('text')
+			.attr('clip-path', d => 'url(#clip-' + d.id + ')')
+			.selectAll('tspan')
+			.data(d => [d.name])
+			.enter().append('tspan')
+			.attr('x', 0)
+			.attr('y', (d, i, nodes) => (13 + (i - nodes.length / 2 - 0.5) * 10))
+			.text(name => name);
+
+		node.append('title')
+			.text(d => (d.cat + '::' + d.name + '\n' + format(d.value)));
+
+		node.on('click', (currentNode) => {
+			d3.event.stopPropagation();
+			console.log('currentNode', currentNode, currentNode.event);
+
+			if (focusedNode && focusedNode !== currentNode) {
+				focusedNode.fx = null;
+				focusedNode.fy = null;
+				focusedNode.r = focusedNode.startR;
+
+				node.filter((d, i) => i === focusedNode.index) // filter only current node
+					.select('circle')
+					.transition().duration(2000).ease(d3.easePolyOut)
+					.attr('r', focusedNode.startR);
+			}
+			// if (!d3.event.active) simulation.alphaTarget(0.5).restart();
+
+			// currentNode.r = halfWidth * 0.5;
+			focusedNode = currentNode;
+			// transition the node
+
+
+			d3.transition().duration(2000).ease(d3.easePolyOut)
+				.tween('moveIn', function () {
+					console.log('tweenMoveIn', focusedNode);
+					let ix = d3.interpolateNumber(focusedNode.x, halfWidth);
+					let iy = d3.interpolateNumber(focusedNode.y, halfHeight);
+					let ir = d3.interpolateNumber(focusedNode.r, halfWidth * 0.5);
+					return function (t) {
+						// console.log('i', ix(t), iy(t));
+						focusedNode.fx = ix(t);
+						focusedNode.fy = iy(t);
+						focusedNode.r = ir(t);
+						simulation.force('collide', forceCollide);
+					};
+				})
+				.on('interrupt', () => {
+					console.log('move interrupt');
+					focusedNode.fx = null;
+					focusedNode.fy = null;
+				})
+
+			node.filter((d, i) => i === focusedNode.index) // filter only current node
+				.select('circle')
+					.transition().duration(2000).ease(d3.easePolyOut)
+					.attr('r', halfWidth * 0.5);
+
+		});
+
+		// blur
+		d3.select(document).on('click', () => {
+			if (focusedNode) {
+				focusedNode.fx = null;
+				focusedNode.fy = null;
+				simulation.alphaTarget(0.2).restart();
+				d3.transition().duration(2000).ease(d3.easePolyOut)
+					.tween('moveOut', function () {
+						console.log('tweenMoveOut', focusedNode);
+						let ir = d3.interpolateNumber(focusedNode.r, focusedNode.startR);
+						return function (t) {
+							focusedNode.r = ir(t);
+							simulation.force('collide', forceCollide);
+						};
+					})
+					.on('end', () => {
+						focusedNode = null;
+						simulation.alphaTarget(0);
+					})
+					.on('interrupt', () => {
+						simulation.alphaTarget(0);
+					})
+
+				node.filter((d, i) => i === focusedNode.index) // filter only current node
+					.select('circle')
+						.transition().duration(2000).ease(d3.easePolyOut)
+						.attr('r', focusedNode.startR);
+			}
+
+
+		});
+
+		function ticked() {
+			// link
+			// 	.attr('x1', function(d) { return d.source.x; })
+			// 	.attr('y1', function(d) { return d.source.y; })
+			// 	.attr('x2', function(d) { return d.target.x; })
+			// 	.attr('y2', function(d) { return d.target.y; });
+			node
+				.attr('transform', d => `translate(${d.x},${d.y})`);
+		}
+	</script>
+</body>
+</html>
