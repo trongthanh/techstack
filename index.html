@@ -162,8 +162,8 @@
 		let svg = d3.select('svg');
 		let width = +svg.attr('width');
 		let height = +svg.attr('height');
-		let halfWidth = width * 0.5;
-		let halfHeight = height * 0.5;
+		let centerX = width * 0.5;
+		let centerY = height * 0.5;
 		let strength = 0.05;
 		let focusedNode;
 
@@ -185,9 +185,9 @@
 			// .force('link', d3.forceLink().id(d => d.id))
 			.force('charge', d3.forceManyBody())
 			.force('collide', forceCollide)
-			// .force('center', d3.forceCenter(halfWidth, halfHeight))
-			.force('x', d3.forceX(halfWidth ).strength(strength))
-			.force('y', d3.forceY(halfHeight ).strength(strength));
+			// .force('center', d3.forceCenter(centerX, centerY))
+			.force('x', d3.forceX(centerX ).strength(strength))
+			.force('y', d3.forceY(centerY ).strength(strength));
 
 		let root = d3.hierarchy({ children: data })
 			.sum(d => d.value);
@@ -195,19 +195,20 @@
 		// we use pack() to automatically calculate radius conveniently only
 		// and get only the leaves
 		let nodes = pack(root).leaves().map(node => {
-			console.log('node:', node.x, (node.x - halfWidth) * 2);
+			console.log('node:', node.x, (node.x - centerX) * 2);
 			const data = node.data;
 			return {
-				x: halfWidth + (node.x - halfWidth) * 3, // magnify start position to have transition to center movement
-				y: halfHeight + (node.y - halfHeight) * 3,
-				r: node.r,
-				startR: node.r, //original radius
+				x: centerX + (node.x - centerX) * 3, // magnify start position to have transition to center movement
+				y: centerY + (node.y - centerY) * 3,
+				r: 0, // for tweening
+				radius: node.r, //original radius
 				id: data.cat + '.' + (data.name.replace(/\s/g, '-')),
 				cat: data.cat,
 				name: data.name,
 				value: data.value,
 			}
 		});
+		simulation.nodes(nodes).on('tick', ticked);
 
 		svg.style('background-color', '#eee');
 		let node = svg.selectAll('.node')
@@ -230,14 +231,18 @@
 					d.fy = null;
 				}));
 
-		simulation.nodes(nodes).on('tick', ticked);
-
-		let circles = node.append('circle')
+		node.append('circle')
 			.attr('id', d => d.id)
 			.attr('r', 0)
 			.style('fill', d => scaleColor(d.cat))
 			.transition().duration(2000).ease(d3.easeElasticOut)
-				.attr('r', d => d.r);
+				.tween('circleIn', (d) => {
+					let i = d3.interpolateNumber(0, d.radius);
+					return (t) => {
+						d.r = i(t);
+						simulation.force('collide', forceCollide);
+					}
+				})
 
 		node.append('clipPath')
 			.attr('id', d => 'clip-' + d.id)
@@ -260,48 +265,57 @@
 			d3.event.stopPropagation();
 			console.log('currentNode', currentNode, currentNode.event);
 
-			if (focusedNode && focusedNode !== currentNode) {
-				focusedNode.fx = null;
-				focusedNode.fy = null;
-				focusedNode.r = focusedNode.startR;
-
-				node.filter((d, i) => i === focusedNode.index) // filter only current node
-					.select('circle')
-					.transition().duration(2000).ease(d3.easePolyOut)
-					.attr('r', focusedNode.startR);
+			if (currentNode === focusedNode) {
+				// no focusedNode or same focused node is clicked
+				return;
 			}
+			let lastNode = focusedNode;
+			focusedNode = currentNode;
+
+			simulation.alphaTarget(0.2).restart();
+
+			// don't fix last node to center anymore
+			if (lastNode) {
+				lastNode.fx = null;
+				lastNode.fy = null;
+				node.filter((d, i) => i === lastNode.index)
+					.transition().duration(2000).ease(d3.easePolyOut)
+					.tween('circleOut', () => {
+						let irl = d3.interpolateNumber(lastNode.r, lastNode.radius);
+						return (t) => {
+							lastNode.r = irl(t);
+						}
+					})
+					.on('interrupt', () => {
+						lastNode.r = lastNode.radius;
+					});
+			}
+
 			// if (!d3.event.active) simulation.alphaTarget(0.5).restart();
 
-			// currentNode.r = halfWidth * 0.5;
-			focusedNode = currentNode;
-			// transition the node
-
-
 			d3.transition().duration(2000).ease(d3.easePolyOut)
-				.tween('moveIn', function () {
-					console.log('tweenMoveIn', focusedNode);
-					let ix = d3.interpolateNumber(focusedNode.x, halfWidth);
-					let iy = d3.interpolateNumber(focusedNode.y, halfHeight);
-					let ir = d3.interpolateNumber(focusedNode.r, halfWidth * 0.5);
+				.tween('moveIn', () => {
+					console.log('tweenMoveIn', currentNode);
+					let ix = d3.interpolateNumber(currentNode.x, centerX);
+					let iy = d3.interpolateNumber(currentNode.y, centerY);
+					let ir = d3.interpolateNumber(currentNode.r, centerX * 0.5);
 					return function (t) {
 						// console.log('i', ix(t), iy(t));
-						focusedNode.fx = ix(t);
-						focusedNode.fy = iy(t);
-						focusedNode.r = ir(t);
+						currentNode.fx = ix(t);
+						currentNode.fy = iy(t);
+						currentNode.r = ir(t);
 						simulation.force('collide', forceCollide);
 					};
 				})
-				.on('interrupt', () => {
-					console.log('move interrupt');
-					focusedNode.fx = null;
-					focusedNode.fy = null;
+				.on('end', () => {
+					simulation.alphaTarget(0);
 				})
-
-			node.filter((d, i) => i === focusedNode.index) // filter only current node
-				.select('circle')
-					.transition().duration(2000).ease(d3.easePolyOut)
-					.attr('r', halfWidth * 0.5);
-
+				.on('interrupt', () => {
+					console.log('move interrupt', currentNode);
+					currentNode.fx = null;
+					currentNode.fy = null;
+					simulation.alphaTarget(0);
+				});
 		});
 
 		// blur
@@ -313,7 +327,7 @@
 				d3.transition().duration(2000).ease(d3.easePolyOut)
 					.tween('moveOut', function () {
 						console.log('tweenMoveOut', focusedNode);
-						let ir = d3.interpolateNumber(focusedNode.r, focusedNode.startR);
+						let ir = d3.interpolateNumber(focusedNode.r, focusedNode.radius);
 						return function (t) {
 							focusedNode.r = ir(t);
 							simulation.force('collide', forceCollide);
@@ -326,14 +340,7 @@
 					.on('interrupt', () => {
 						simulation.alphaTarget(0);
 					})
-
-				node.filter((d, i) => i === focusedNode.index) // filter only current node
-					.select('circle')
-						.transition().duration(2000).ease(d3.easePolyOut)
-						.attr('r', focusedNode.startR);
 			}
-
-
 		});
 
 		function ticked() {
@@ -343,7 +350,9 @@
 			// 	.attr('x2', function(d) { return d.target.x; })
 			// 	.attr('y2', function(d) { return d.target.y; });
 			node
-				.attr('transform', d => `translate(${d.x},${d.y})`);
+				.attr('transform', d => `translate(${d.x},${d.y})`)
+				.select('circle')
+					.attr('r', d => d.r);
 		}
 	</script>
 </body>
