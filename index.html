@@ -18,82 +18,143 @@
 	<svg width="1024" height="700" font-family="sans-serif" font-size="10" text-anchor="middle"></svg>
 	<script src="js/d3.min.js"></script>
 	<script>
-		const csv = `cat,name,value
-library,D3,20
-library,PostCSS,10
-library,Raphael,30
-library,Relay,70
-library,Three.js,40
-library.sub,Lodash,30
-library.sub,Moment JS,30
-library.sub,Numeral,20
-library.sub,Redux,100
-
-framework,Angular 2.0,30
-framework,Trails.JS,10
-framework,Bootstrap CSS,50
-framework,Ember JS,10
-framework,ExpressJS,30
-framework,Foundation,10
-framework,Hexo,50
-framework,ReactJS,100
-framework,SenchaTouch,10
-
-tooling,Atom,10
-tooling,Google Chrome & Devtool,70
-tooling,Jenkin CI,30
-tooling,Sublime Text 3,100
-tooling,Visual Studio Code,50
-tooling,Web Page Performance Tooling,30
-tooling,Yeoman generator for Nau Workflow,20
-
-backend,Elastic Search,10
-backend,Keystone CMS,50
-backend,KoaJS,10
-backend,Loopback,30
-backend,Restify,20
-backend,MongoDB,70
-backend,NodeJS,100
-
-platform,Docker Platform, 10
-platform,MeteorJS,80
-platform,Reaction Commerce,20
-platform,ReactNative,10
-platform,SquareSpace,30
-
-language,ECMAScript 6,100
-language,HTML5 & CSS3,80
-language,JavaScript,50
-language,CSS Next, 10
-language,GraphQL,50
-language,LESS CSS,20
-language,SCSS (Sass),70
-language,TypeScript 2,30
-
-workflow,code.naustud.io,100
-workflow,BabelJS,50
-workflow,Browserify,10
-workflow,CSS BEM Notation,70
-workflow,CSS Guidelines,20
-workflow,ESLint,20
-workflow,Git Flow,70
-workflow,GulpJS,50
-workflow,Nau Code Styles,50
-workflow,Stylelint,50
-workflow,SystemJS,10
-workflow,Webpack,30
-
-deprecated,Angular JS 1,10
-deprecated,Backbone,30
-deprecated,Grunt & Automation Stack,30
-deprecated,jQuery,50
-deprecated,RequireJS & AMD,30
-deprecated.tooling,Browser Sync,40
-deprecated.tooling,Git Pre-commit,30
-deprecated.tooling,http-server,20
-deprecated.tooling,Live Reload,20
-deprecated.tooling,live-server,30
-`
+		// Based loosely from this D3 bubble graph https://bl.ocks.org/mbostock/4063269
+		// And this Forced directed diagram https://bl.ocks.org/mbostock/4062045
+		const data = [{
+			cat: 'library', name: 'D3', value: 20,
+		}, {
+			cat: 'library', name: 'PostCSS', value: 10,
+		}, {
+			cat: 'library', name: 'Raphael', value: 30,
+		}, {
+			cat: 'library', name: 'Relay', value: 70,
+		}, {
+			cat: 'library', name: 'Three.js', value: 40,
+		}, {
+			cat: 'library.sub', name: 'Lodash', value: 30,
+		}, {
+			cat: 'library.sub', name: 'Moment JS', value: 30,
+		}, {
+			cat: 'library.sub', name: 'Numeral', value: 20,
+		}, {
+			cat: 'library.sub', name: 'Redux', value: 100,
+		}, {
+			cat: 'framework', name: 'Angular 2.0', value: 30,
+		}, {
+			cat: 'framework', name: 'Trails.JS', value: 10,
+		}, {
+			cat: 'framework', name: 'Bootstrap CSS', value: 50,
+		}, {
+			cat: 'framework', name: 'Ember JS', value: 10,
+		}, {
+			cat: 'framework', name: 'ExpressJS', value: 30,
+		}, {
+			cat: 'framework', name: 'Foundation', value: 10,
+		}, {
+			cat: 'framework', name: 'Hexo', value: 50,
+		}, {
+			cat: 'framework', name: 'ReactJS', value: 100,
+		}, {
+			cat: 'framework', name: 'SenchaTouch', value: 10,
+		}, {
+			cat: 'tooling', name: 'Atom', value: 10,
+		}, {
+			cat: 'tooling', name: 'Google Chrome & Devtool', value: 70,
+		}, {
+			cat: 'tooling', name: 'Jenkin CI', value: 30,
+		}, {
+			cat: 'tooling', name: 'Sublime Text 3', value: 100,
+		}, {
+			cat: 'tooling', name: 'Visual Studio Code', value: 50,
+		}, {
+			cat: 'tooling', name: 'Web Page Performance Tooling', value: 30,
+		}, {
+			cat: 'tooling', name: 'Yeoman generator for Nau Workflow', value: 20,
+		}, {
+			cat: 'backend', name: 'Elastic Search', value: 10,
+		}, {
+			cat: 'backend', name: 'Keystone CMS', value: 50,
+		}, {
+			cat: 'backend', name: 'KoaJS', value: 10,
+		}, {
+			cat: 'backend', name: 'Loopback', value: 30,
+		}, {
+			cat: 'backend', name: 'Restify', value: 20,
+		}, {
+			cat: 'backend', name: 'MongoDB', value: 70,
+		}, {
+			cat: 'backend', name: 'NodeJS', value: 100,
+		}, {
+			cat: 'platform', name: 'Docker Platform', value: 10,
+		}, {
+			cat: 'platform', name: 'MeteorJS', value: 80,
+		}, {
+			cat: 'platform', name: 'Reaction Commerce', value: 20,
+		}, {
+			cat: 'platform', name: 'ReactNative', value: 10,
+		}, {
+			cat: 'platform', name: 'SquareSpace', value: 30,
+		}, {
+			cat: 'language', name: 'ECMAScript 6', value: 100,
+		}, {
+			cat: 'language', name: 'HTML5 & CSS3', value: 80,
+		}, {
+			cat: 'language', name: 'JavaScript', value: 50,
+		}, {
+			cat: 'language', name: 'CSS Next', value: 10,
+		}, {
+			cat: 'language', name: 'GraphQL', value: 50,
+		}, {
+			cat: 'language', name: 'LESS CSS', value: 20,
+		}, {
+			cat: 'language', name: 'SCSS (Sass)', value: 70,
+		}, {
+			cat: 'language', name: 'TypeScript 2', value: 30,
+		}, {
+			cat: 'workflow', name: 'code.naustud.io', value: 100,
+		}, {
+			cat: 'workflow', name: 'BabelJS', value: 50,
+		}, {
+			cat: 'workflow', name: 'Browserify', value: 10,
+		}, {
+			cat: 'workflow', name: 'CSS BEM Notation', value: 70,
+		}, {
+			cat: 'workflow', name: 'CSS Guidelines', value: 20,
+		}, {
+			cat: 'workflow', name: 'ESLint', value: 20,
+		}, {
+			cat: 'workflow', name: 'Git Flow', value: 70,
+		}, {
+			cat: 'workflow', name: 'GulpJS', value: 50,
+		}, {
+			cat: 'workflow', name: 'Nau Code Styles', value: 50,
+		}, {
+			cat: 'workflow', name: 'Stylelint', value: 50,
+		}, {
+			cat: 'workflow', name: 'SystemJS', value: 10,
+		}, {
+			cat: 'workflow', name: 'Webpack', value: 30,
+		}, {
+			cat: 'deprecated', name: 'Angular JS 1', value: 10,
+		}, {
+			cat: 'deprecated', name: 'Backbone', value: 30,
+		}, {
+			cat: 'deprecated', name: 'Grunt & Automation Stack', value: 30,
+		}, {
+			cat: 'deprecated', name: 'jQuery', value: 50,
+		}, {
+			cat: 'deprecated', name: 'RequireJS & AMD', value: 30,
+		}, {
+			cat: 'deprecated.tooling', name: 'Browser Sync', value: 40,
+		}, {
+			cat: 'deprecated.tooling', name: 'Git Pre-commit', value: 30,
+		}, {
+			cat: 'deprecated.tooling', name: 'http-server', value: 20,
+		}, {
+			cat: 'deprecated.tooling', name: 'Live Reload', value: 20,
+		}, {
+			cat: 'deprecated.tooling', name: 'live-server', value: 30,
+		}];
 	</script>
 
 
@@ -127,11 +188,6 @@ deprecated.tooling,live-server,30
 			// .force('center', d3.forceCenter(halfWidth, halfHeight))
 			.force('x', d3.forceX(halfWidth ).strength(strength))
 			.force('y', d3.forceY(halfHeight ).strength(strength));
-
-		let data = d3.csvParse(csv, (d) => {
-			d.value = +d.value;
-			if (d.value) return d;
-		});
 
 		let root = d3.hierarchy({ children: data })
 			.sum(d => d.value);
