@@ -22,138 +22,202 @@
 		// And this Forced directed diagram https://bl.ocks.org/mbostock/4062045
 		let data = [{
 			cat: 'library', name: 'D3', value: 30,
+			icon: 'img/d3.svg',
 		}, {
-			cat: 'library', name: 'PostCSS', value: 10,
+			cat: 'library', name: 'PostCSS', value: 30,
+			icon: 'img/postcss.svg',
 		}, {
-			cat: 'library', name: 'Raphael', value: 30,
+			cat: 'library', name: 'Raphael', value: 10,
+			icon: 'img/raphael.svg',
 		}, {
 			cat: 'library', name: 'Relay', value: 70,
+			icon: 'img/relay.svg',
 		}, {
 			cat: 'library', name: 'Three.js', value: 40,
+			icon: 'img/threejs.png',
 		}, {
 			cat: 'library.sub', name: 'Lodash', value: 30,
+			icon: 'img/lodash.svg',
 		}, {
 			cat: 'library.sub', name: 'Moment JS', value: 30,
+			icon: 'img/momentjs.png',
 		}, {
-			cat: 'library.sub', name: 'Numeral', value: 20,
+			cat: 'library.sub', name: 'Numeral.js', value: 20,
+			icon: '',
 		}, {
-			cat: 'library.sub', name: 'Redux', value: 100,
+			cat: 'library.sub', name: 'Redux', value: 80,
+			icon: 'img/redux.svg',
 		}, {
 			cat: 'framework', name: 'Angular 2.0', value: 30,
-		}, {
+			icon: 'img/angular2.svg',
+		}, /*{
 			cat: 'framework', name: 'Trails.JS', value: 10,
-		}, {
+			icon: '',
+		},*/ {
 			cat: 'framework', name: 'Bootstrap CSS', value: 50,
+			icon: 'img/bootstrap.svg',
 		}, {
 			cat: 'framework', name: 'Ember JS', value: 10,
+			icon: 'img/ember.png',
 		}, {
 			cat: 'framework', name: 'ExpressJS', value: 30,
-		}, {
+			icon: 'img/expressjs.png',
+		}, /*{
 			cat: 'framework', name: 'Foundation', value: 10,
-		}, {
+			icon: '',
+		},*/{
 			cat: 'framework', name: 'Hexo', value: 50,
+			icon: 'img/hexo.png',
 		}, {
 			cat: 'framework', name: 'ReactJS', value: 100,
-		}, {
+			icon: 'img/react.png',
+		}, /*{
 			cat: 'framework', name: 'SenchaTouch', value: 10,
-		}, {
+			icon: '',
+		},*/ {
 			cat: 'tooling', name: 'Atom', value: 10,
+			icon: 'img/atom.png',
 		}, {
 			cat: 'tooling', name: 'Google Chrome & Devtool', value: 70,
+			icon: 'img/chrome-devtools.svg',
 		}, {
-			cat: 'tooling', name: 'Jenkin CI', value: 30,
+			cat: 'tooling', name: 'Jenkins CI', value: 30,
+			icon: 'img/jenkins.png',
 		}, {
 			cat: 'tooling', name: 'Sublime Text 3', value: 100,
+			icon: 'img/sublimetext.png',
 		}, {
 			cat: 'tooling', name: 'Visual Studio Code', value: 50,
+			icon: 'img/vscode.png',
 		}, {
-			cat: 'tooling', name: 'Web Page Performance Tooling', value: 30,
+			cat: 'tooling', name: 'Web Page;Performance;Tooling', value: 30,
+			icon: '',
 		}, {
 			cat: 'tooling', name: 'Yeoman generator for Nau Workflow', value: 20,
+			icon: 'img/yeoman.png',
 		}, {
-			cat: 'backend', name: 'Elastic Search', value: 10,
+			cat: 'backend', name: 'Elastic;Search', value: 10,
+			icon: '',
 		}, {
 			cat: 'backend', name: 'Keystone CMS', value: 50,
+			icon: 'img/keystonejs.png',
 		}, {
 			cat: 'backend', name: 'KoaJS', value: 10,
+			icon: 'img/koajs.png',
 		}, {
 			cat: 'backend', name: 'Loopback', value: 30,
+			icon: 'img/loopback.svg',
 		}, {
 			cat: 'backend', name: 'Restify', value: 20,
+			icon: 'img/restify.png',
 		}, {
 			cat: 'backend', name: 'MongoDB', value: 70,
+			icon: 'img/mongodb.png',
 		}, {
 			cat: 'backend', name: 'NodeJS', value: 100,
+			icon: 'img/nodejs.svg',
 		}, {
 			cat: 'platform', name: 'Docker Platform', value: 10,
+			icon: 'img/docker.svg',
 		}, {
 			cat: 'platform', name: 'MeteorJS', value: 80,
+			icon: 'img/meteor.svg',
 		}, {
 			cat: 'platform', name: 'Reaction Commerce', value: 20,
+			icon: 'img/reactioncommerce.png',
 		}, {
 			cat: 'platform', name: 'ReactNative', value: 10,
+			icon: 'img/reactnative.png',
 		}, {
 			cat: 'platform', name: 'SquareSpace', value: 30,
+			icon: 'img/squarespace.svg',
 		}, {
-			cat: 'language', name: 'ECMAScript 6', value: 100,
+			cat: 'language', name: 'HTML5 & CSS3', value: 100,
+			icon: 'img/html5-css3.png',
 		}, {
-			cat: 'language', name: 'HTML5 & CSS3', value: 80,
-		}, {
-			cat: 'language', name: 'JavaScript', value: 50,
+			cat: 'language', name: 'JavaScript', value: 100,
+			icon: 'img/javascript.png',
 		}, {
 			cat: 'language', name: 'CSS Next', value: 10,
+			icon: 'img/cssnext.png',
 		}, {
 			cat: 'language', name: 'GraphQL', value: 50,
+			icon: 'img/graphql.svg',
 		}, {
 			cat: 'language', name: 'LESS CSS', value: 20,
+			icon: 'img/less.svg',
 		}, {
 			cat: 'language', name: 'SCSS (Sass)', value: 70,
+			icon: 'img/sass.png',
 		}, {
 			cat: 'language', name: 'TypeScript 2', value: 30,
+			icon: 'img/typescript.png',
 		}, {
 			cat: 'workflow', name: 'code.naustud.io', value: 100,
+			icon: 'img/naustudio.svg',
 		}, {
 			cat: 'workflow', name: 'BabelJS', value: 50,
-		}, {
+			icon: 'img/babel.png',
+		}, /*{
 			cat: 'workflow', name: 'Browserify', value: 10,
-		}, {
+			icon: '',
+		},*/ {
 			cat: 'workflow', name: 'CSS BEM Notation', value: 70,
+			icon: '',
 		}, {
-			cat: 'workflow', name: 'CSS Guidelines', value: 20,
+			cat: 'workflow', name: 'Front End;Code Guide', value: 30,
+			icon: '',
 		}, {
 			cat: 'workflow', name: 'ESLint', value: 20,
+			icon: 'img/eslint.svg',
 		}, {
-			cat: 'workflow', name: 'Git Flow', value: 70,
+			cat: 'workflow', name: 'Gitflow Workflow', value: 70,
+			icon: 'img/gitflow.png',
 		}, {
 			cat: 'workflow', name: 'GulpJS', value: 50,
+			icon: 'img/gulp.png',
 		}, {
 			cat: 'workflow', name: 'Nau Code Styles', value: 50,
+			icon: '',
 		}, {
 			cat: 'workflow', name: 'Stylelint', value: 50,
+			icon: 'img/stylelint.svg',
 		}, {
-			cat: 'workflow', name: 'SystemJS', value: 10,
+			cat: 'workflow', name: 'SystemJS', value: 20,
+			icon: '',
 		}, {
 			cat: 'workflow', name: 'Webpack', value: 30,
+			icon: 'img/webpack.svg',
 		}, {
-			cat: 'deprecated', name: 'Angular JS 1', value: 10,
+			cat: 'deprecated', name: 'AngularJS 1', value: 10,
+			icon: 'img/angular1.png',
 		}, {
 			cat: 'deprecated', name: 'Backbone', value: 30,
+			icon: 'img/backbone.png',
 		}, {
 			cat: 'deprecated', name: 'Grunt & Automation Stack', value: 30,
+			icon: 'img/grunt.svg',
 		}, {
 			cat: 'deprecated', name: 'jQuery', value: 50,
+			icon: 'img/jquery.png',
 		}, {
 			cat: 'deprecated', name: 'RequireJS & AMD', value: 30,
+			icon: 'img/requirejs.svg',
 		}, {
 			cat: 'deprecated.tooling', name: 'Browser Sync', value: 40,
+			icon: '',
 		}, {
-			cat: 'deprecated.tooling', name: 'Git Pre-commit', value: 30,
+			cat: 'deprecated.tooling', name: 'Git;Pre-commit', value: 30,
+			icon: '',
 		}, {
 			cat: 'deprecated.tooling', name: 'http-server', value: 20,
+			icon: '',
 		}, {
-			cat: 'deprecated.tooling', name: 'Live Reload', value: 20,
+			cat: 'deprecated.tooling', name: 'Live;Reload', value: 20,
+			icon: '',
 		}, {
 			cat: 'deprecated.tooling', name: 'live-server', value: 30,
+			icon: '',
 		}];
 	</script>
 
@@ -175,7 +239,6 @@
 		// use pack to calculate radius of the circle
 		let pack = d3.pack()
 			.size([width , height ])
-			// .size([width * 0.5, height * 0.5]) // half size of viewport
 			.padding(1.5);
 
 		let forceCollide = d3.forceCollide(d => d.r + 1);
@@ -213,6 +276,7 @@
 				cat: data.cat,
 				name: data.name,
 				value: data.value,
+				icon: data.icon,
 			}
 		});
 		simulation.nodes(nodes).on('tick', ticked);
@@ -252,21 +316,32 @@
 				})
 
 		node.append('clipPath')
-			.attr('id', d => 'clip-' + d.id)
+			.attr('id', d => `clip-${d.id}`)
 			.append('use')
-			.attr('xlink:href', d => '#' + d.id);
+			.attr('xlink:href', d => `#${d.id}`);
 
 		node.append('text')
-			.attr('clip-path', d => 'url(#clip-' + d.id + ')')
+			.attr('visibility', d => (d.icon ? 'collapse' : 'visible')) // hide title if icon available
+			.attr('clip-path', d => `url(#clip-${d.id})`)
 			.selectAll('tspan')
-			.data(d => [d.name])
-			.enter().append('tspan')
-			.attr('x', 0)
-			.attr('y', (d, i, nodes) => (13 + (i - nodes.length / 2 - 0.5) * 10))
-			.text(name => name);
+			.data(d => d.name.split(';'))
+			.enter()
+				.append('tspan')
+				.attr('x', 0)
+				.attr('y', (d, i, nodes) => (13 + (i - nodes.length / 2 - 0.5) * 10))
+				.text(name => name);
 
 		node.append('title')
 			.text(d => (d.cat + '::' + d.name + '\n' + format(d.value)));
+
+		node.append('image')
+			.attr('clip-path', d => `url(#clip-${d.id})`)
+			.attr('visibility', d => (d.icon ? 'visible' : 'collapse'))
+			.attr('xlink:href', d => d.icon)
+			.attr('x', d => - d.radius * 0.75)
+			.attr('y', d => - d.radius * 0.75)
+			.attr('height', d => d.radius * 2 * 0.75)
+			.attr('width', d => d.radius * 2 * 0.75)
 
 		node.on('click', (currentNode) => {
 			d3.event.stopPropagation();
