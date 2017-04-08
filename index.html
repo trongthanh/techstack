@@ -20,8 +20,8 @@
 	<script>
 		// Based loosely from this D3 bubble graph https://bl.ocks.org/mbostock/4063269
 		// And this Forced directed diagram https://bl.ocks.org/mbostock/4062045
-		const data = [{
-			cat: 'library', name: 'D3', value: 20,
+		let data = [{
+			cat: 'library', name: 'D3', value: 30,
 		}, {
 			cat: 'library', name: 'PostCSS', value: 10,
 		}, {
@@ -188,6 +188,13 @@
 			// .force('center', d3.forceCenter(centerX, centerY))
 			.force('x', d3.forceX(centerX ).strength(strength))
 			.force('y', d3.forceY(centerY ).strength(strength));
+
+		// reduce number of circles on mobile screen due to slow computation
+		if ('matchMedia' in window && window.matchMedia('(max-device-width: 767px)').matches) {
+			data = data.filter(el => {
+				return el.value >= 50;
+			});
+		}
 
 		let root = d3.hierarchy({ children: data })
 			.sum(d => d.value);
