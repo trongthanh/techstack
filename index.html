@@ -8,6 +8,7 @@
 			margin: 0;
 			box-sizing: border-box;
 			font-family: Helvetica, Calibri, Roboto, Open Sans, sans-serif
+			-webkit-backface-visibility: hidden;
 		}
 		* {
 			box-sizing: inherit;
@@ -22,31 +23,30 @@
 		}
 
 		.circle-overlay {
+			font-size: 16px;
 			border-radius: 50%;
 			position: absolute;
-			height: 350px;
-			width: 350px;
-			background-color: gray;
 			overflow: hidden;
-			display: none;
+			/*it's buggy with the foreignObject background right now*/
+			/*background-color: rgba(255,255,255,0.5);*/
 		}
 		.circle-overlay__inner {
 			text-align: center;
 			width: 100%;
 			height: 100%;
-			padding: 10%;
+		}
+
+		.hidden {
+			display: none;
+		}
+		.node-icon--faded {
+			opacity: 0.5;
 		}
 	</style>
 </head>
 <body>
 	<h1>Nau Technologies Stack</h1>
 	<svg width="100%" height="700" font-family="sans-serif" font-size="10" text-anchor="middle"></svg>
-	<div id="circle-overlay" class="circle-overlay">
-		<div class="circle-overlay__inner">
-			<h2 class="circle-overlay__title">ReactJS</h2>
-			<p class="circle-overlay__body">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam, sunt, aspernatur. Autem repudiandae, laboriosam. Nulla quidem nihil aperiam dolorem repellendus pariatur, quaerat sed eligendi inventore ipsa natus fugiat soluta doloremque!</p>
-		</div>
-	</div>
 
 	<script src="js/d3.min.js"></script>
 	<script>
@@ -525,7 +525,6 @@
 
 	<script>
 		let svg = d3.select('svg');
-		let circleOverlay = d3.select('#circle-overlay');
 		let width = document.body.clientWidth; // get width in pixels
 		let height = +svg.attr('height');
 		let centerX = width * 0.5;
@@ -625,6 +624,7 @@
 		// display text as circle icon
 		node.filter(d => !String(d.icon).includes('img/'))
 			.append('text')
+			.classed('node-icon', true)
 			.attr('clip-path', d => `url(#clip-${d.id})`)
 			.selectAll('tspan')
 			.data(d => d.icon.split(';'))
@@ -637,6 +637,7 @@
 		// display image as circle icon
 		node.filter(d => String(d.icon).includes('img/'))
 			.append('image')
+			.classed('node-icon', true)
 			.attr('clip-path', d => `url(#clip-${d.id})`)
 			.attr('xlink:href', d => d.icon)
 			.attr('x', d => - d.radius * 0.7)
@@ -646,6 +647,32 @@
 
 		node.append('title')
 			.text(d => (d.cat + '::' + d.name + '\n' + format(d.value)));
+
+		/*
+		<foreignObject class="circle-overlay" x="10" y="10" width="100" height="150">
+			<div class="circle-overlay__inner">
+				<h2 class="circle-overlay__title">ReactJS</h2>
+				<p class="circle-overlay__body">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam, sunt, aspernatur. Autem repudiandae, laboriosam. Nulla quidem nihil aperiam dolorem repellendus pariatur, quaerat sed eligendi inventore ipsa natus fugiat soluta doloremque!</p>
+			</div>
+		</foreignObject>
+		*/
+		let infoBox = node.append('foreignObject')
+			.classed('circle-overlay hidden', true)
+			.attr('x', -350 * 0.5 * 0.8)
+			.attr('y', -350 * 0.5 * 0.8)
+			.attr('height', 350 * 0.8)
+			.attr('width', 350 * 0.8)
+				.append('xhtml:div')
+				.classed('circle-overlay__inner', true);
+
+		infoBox.append('h2')
+			.classed('circle-overlay__title', true)
+			.text(d => d.name);
+
+		infoBox.append('p')
+			.classed('circle-overlay__body', true)
+			.html(d => d.desc);
+
 
 		node.on('click', (currentNode) => {
 			d3.event.stopPropagation();
@@ -660,7 +687,9 @@
 			focusedNode = currentNode;
 
 			simulation.alphaTarget(0.2).restart();
-			circleOverlay.style('display', 'none');
+			// hide all circle-overlay
+			d3.selectAll('.circle-overlay').classed('hidden', true);
+			d3.selectAll('.node-icon').classed('node-icon--faded', false);
 
 			// don't fix last node to center anymore
 			if (lastNode) {
@@ -697,17 +726,12 @@
 				})
 				.on('end', () => {
 					simulation.alphaTarget(0);
-					//
-					const circle = currentTarget.querySelector('circle');
-					const rect = circle.getClientRects()[0];
-					const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-					console.log('rect', rect);
-					circleOverlay.style('top', rect.top + scrollTop + 'px')
-						.style('left', rect.left + 'px')
-						.style('display', 'block')
-						.style('background-color', d3.select(circle).style('fill'))
-					circleOverlay.select('.circle-overlay__title').text(currentNode.name);
-					circleOverlay.select('.circle-overlay__body').html(currentNode.desc);
+					let $currentGroup = d3.select(currentTarget);
+					$currentGroup.select('.circle-overlay')
+						.classed('hidden', false);
+					$currentGroup.select('.node-icon')
+						.classed('node-icon--faded', true);
+
 				})
 				.on('interrupt', () => {
 					console.log('move interrupt', currentNode);
@@ -742,44 +766,14 @@
 					.on('interrupt', () => {
 						simulation.alphaTarget(0);
 					});
-				circleOverlay.style('display', 'none');
+
+				// hide all circle-overlay
+				d3.selectAll('.circle-overlay').classed('hidden', true);
+				d3.selectAll('.node-icon').classed('node-icon--faded', false);
 			}
 		});
 
-		// circleOverlay.call(d3.drag()
-		// 	.on('start', (d) => {
-		// 		if (!d3.event.active) simulation.alphaTarget(0.2).restart();
-		// 		if (focusedNode) {
-		// 			focusedNode.fx = d.x;
-		// 			focusedNode.fy = d.y;
-		// 		}
-		// 		// d.fx = d.x;
-		// 		// d.fy = d.y;
-		// 	})
-		// 	.on('drag', (d) => {
-		// 		if (focusedNode) {
-		// 			focusedNode.fx = d3.event.x;
-		// 			focusedNode.fy =  d3.event.y;
-		// 		}
-		// 		// d.fx = d3.event.x;
-		// 		// d.fy = d3.event.y;
-		// 	})
-		// 	.on('end', (d) => {
-		// 		if (!d3.event.active) simulation.alphaTarget(0);
-		// 		if (focusedNode) {
-		// 			focusedNode.fx = null;
-		// 			focusedNode.fy =  null;
-		// 		}
-		// 		// d.fx = null;
-		// 		// d.fy = null;
-		// 	}));
-
 		function ticked() {
-			// link
-			// 	.attr('x1', function(d) { return d.source.x; })
-			// 	.attr('y1', function(d) { return d.source.y; })
-			// 	.attr('x2', function(d) { return d.target.x; })
-			// 	.attr('y2', function(d) { return d.target.y; });
 			node
 				.attr('transform', d => `translate(${d.x},${d.y})`)
 				.select('circle')
